@@ -2,23 +2,26 @@
 //  ContentView.swift
 //  FridgeChef
 //
-//  Created by 平良隼涼 on 2026/04/01.
+//  Created by Shunsuke Taira on 2026/04/01.
 //
 
 import SwiftUI
 
 struct ContentView: View {
+    //撮影した写真を一時的に保持する変数
+    @State private var capturedImage: UIImage? = nil
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        ZStack {
+            //もし写真がセットされていれば、結果画面に遷移する
+            if let image = capturedImage {
+                ResultView(image: image) {
+                    self.capturedImage = nil
+                }
+            } else {
+                //写真がなければカメラ画面に遷移する
+                CameraView(capturedImage: $capturedImage)
+            }
         }
-        .padding()
     }
-}
-
-#Preview {
-    ContentView()
 }
