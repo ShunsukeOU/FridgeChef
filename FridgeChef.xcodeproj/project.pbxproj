@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		24555ED82F7D58D60098C640 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 24555ED72F7D58D60098C640 /* README.md */; };
 		249BB6972F7D453F004534C0 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 249BB6962F7D453F004534C0 /* Config.swift */; };
 		249BB69B2F7D4711004534C0 /* Config.example.swift in Sources */ = {isa = PBXBuildFile; fileRef = 249BB69A2F7D4711004534C0 /* Config.example.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		2419EB302F7D2A2D0055BB78 /* FridgeChef.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FridgeChef.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		24555ED72F7D58D60098C640 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		249BB6962F7D453F004534C0 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		249BB69A2F7D4711004534C0 /* Config.example.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.example.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -39,6 +41,7 @@
 		2419EB272F7D2A2D0055BB78 = {
 			isa = PBXGroup;
 			children = (
+				24555ED72F7D58D60098C640 /* README.md */,
 				249BB6962F7D453F004534C0 /* Config.swift */,
 				249BB69A2F7D4711004534C0 /* Config.example.swift */,
 				2419EB322F7D2A2D0055BB78 /* FridgeChef */,
@@ -118,6 +121,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				24555ED82F7D58D60098C640 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

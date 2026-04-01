@@ -1,7 +1,7 @@
-# 自身のAPIキーが書かれたファイルを指定（絶対に公開しない）
+#API key
 Config.swift
 
-# その他、Xcodeが自動生成する不要なファイル
+#other files by Xcode
 .DS_Store
 build/
 DerivedData/

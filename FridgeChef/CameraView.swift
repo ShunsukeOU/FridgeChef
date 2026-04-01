@@ -15,7 +15,7 @@ class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelegate {
     @Published var output = AVCapturePhotoOutput()
     @Published var capturedImage: UIImage?
     
-    // カメラのアクセス許可を確認
+    //カメラのアクセス許可
     func checkPermissions() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
@@ -69,16 +69,14 @@ class CameraModel: NSObject, ObservableObject, AVCapturePhotoCaptureDelegate {
     }
 }
 
-// MARK: - カメラの映像をSwiftUIに映すための変換用ビュー
+//カメラの映像をSwiftUIに映すための変換用ビュー
 struct CameraPreview: UIViewRepresentable {
     @ObservedObject var camera: CameraModel
     
     func makeUIView(context: Context) -> UIView {
-        // Use a zero frame; sizing will be handled by SwiftUI layout and the view's bounds
         let view = PreviewContainerView()
         let previewLayer = AVCaptureVideoPreviewLayer(session: camera.session)
         previewLayer.videoGravity = .resizeAspectFill
-        // Assign the layer to the container so it can keep it sized to its bounds
         view.attachPreviewLayer(previewLayer)
         return view
     }
@@ -99,28 +97,53 @@ private final class PreviewContainerView: UIView {
 
     override func layoutSubviews() {
         super.layoutSubviews()
-        // Keep the preview layer in sync with current bounds
         previewLayer?.frame = bounds
     }
 }
 
-// MARK: - 実際の画面の見た目（UI）
+//実際の画面の見た目（UI）
 struct CameraView: View {
     @Binding var capturedImage: UIImage?
     @StateObject var camera = CameraModel()
     
+    //画面フラッシュを管理するための状態変数
+    @State private var flashScreen = false
+    
     var body: some View {
         ZStack {
-            // カメラの映像を全画面に敷く
+            //カメラの映像を全画面に敷く
             CameraPreview(camera: camera)
                 .ignoresSafeArea()
+                //カメラ映像の上に白い画面を重ねる
+                .overlay(
+                    Color.white
+                        .opacity(flashScreen ? 1 : 0)
+                        .ignoresSafeArea()
+                )
             
             VStack {
                 Spacer()
                 
-                // シャッターボタン
+                //シャッターボタン
                 Button(action: {
+                    //写真を撮る処理
                     camera.takePicture()
+                    
+                    //Haptic Feedback（端末を一瞬振動させる）
+                    let generator = UIImpactFeedbackGenerator(style: .medium)
+                    generator.impactOccurred()
+                    
+                    //画面を一瞬だけ白く光らせるアニメーション
+                    withAnimation(.linear(duration: 0.1)) {
+                        flashScreen = true
+                    }
+                    //0.1秒後に元の透明に戻す
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        withAnimation(.linear(duration: 0.1)) {
+                            flashScreen = false
+                        }
+                    }
+                    
                 }) {
                     Circle()
                         .strokeBorder(Color.white, lineWidth: 3)
@@ -133,12 +156,13 @@ struct CameraView: View {
         .onAppear {
             camera.checkPermissions()
         }
-        // CameraModelで写真が撮れたら、大元のContentViewに画像を渡して画面遷移させる
         .onChange(of: camera.capturedImage) { oldValue, newValue in
-            if let image = newValue {
-                capturedImage = image
-            }
-        }
+                    if let image = newValue {
+                        // 撮影アニメーションを見せるため、画面遷移をほんの少し（0.5秒）遅らせる
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            capturedImage = image
+                        }
+                    }
+                }
     }
 }
-

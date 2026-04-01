@@ -47,16 +47,15 @@ struct ResultView: View {
             .padding()
         }
         .onAppear {
-                    // 本物のAPIを呼び出す
+                    //GeminiAPIを呼び出す→GeminiService.swift
                     let service = GeminiService()
                     service.analyzeImage(image: image) { resultText in
                         if let resultText = resultText {
-                            // APIから返ってきた文章を画面にセット
+                            //APIが返した文章を画面に表示する
                             self.recipeText = resultText
                         } else {
-                            self.recipeText = "エラーが発生しました。"
+                            self.recipeText = "エラーが発生しました。もう一度撮影してください。"
                         }
-                        // ロード画面を終了
                         self.isAnalyzing = false
                     }
                 }
