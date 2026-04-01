@@ -1,0 +1,8 @@
+# 自身のAPIキーが書かれたファイルを指定（絶対に公開しない）
+Config.swift
+
+# その他、Xcodeが自動生成する不要なファイル
+.DS_Store
+build/
+DerivedData/
+*.xcuserstate

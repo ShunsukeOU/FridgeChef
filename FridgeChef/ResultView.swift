@@ -47,11 +47,18 @@ struct ResultView: View {
             .padding()
         }
         .onAppear {
-            //一旦適当な結果画面を表示させる
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                self.recipeText = "【提案レシピ】\n1. 豚肉とキャベツの塩昆布炒め\n2. 冷蔵庫の残り野菜スープ\n3. にんじんと卵のシンプルチャーハン"
-                self.isAnalyzing = false
-            }
-        }
+                    // 本物のAPIを呼び出す
+                    let service = GeminiService()
+                    service.analyzeImage(image: image) { resultText in
+                        if let resultText = resultText {
+                            // APIから返ってきた文章を画面にセット
+                            self.recipeText = resultText
+                        } else {
+                            self.recipeText = "エラーが発生しました。"
+                        }
+                        // ロード画面を終了
+                        self.isAnalyzing = false
+                    }
+                }
     }
 }
