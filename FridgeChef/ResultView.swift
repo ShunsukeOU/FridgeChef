@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ResultView: View {
     var image: UIImage
+    var mode: DietaryMode//選択されたモードを受け取る変数を追加
     var resetAction: () -> Void
     
     @State private var isAnalyzing = true
@@ -49,7 +50,7 @@ struct ResultView: View {
         .onAppear {
                     //GeminiAPIを呼び出す→GeminiService.swift
                     let service = GeminiService()
-                    service.analyzeImage(image: image) { resultText in
+                    service.analyzeImage(image: image, mode: mode) { resultText in
                         if let resultText = resultText {
                             //APIが返した文章を画面に表示する
                             self.recipeText = resultText

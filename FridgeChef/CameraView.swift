@@ -105,6 +105,7 @@ private final class PreviewContainerView: UIView {
 struct CameraView: View {
     @Binding var capturedImage: UIImage?
     @StateObject var camera = CameraModel()
+    @Binding var selectedMode: DietaryMode//ContentViewから今何モードになっているのかを受け取る
     
     //画面フラッシュを管理するための状態変数
     @State private var flashScreen = false
@@ -122,36 +123,46 @@ struct CameraView: View {
                 )
             
             VStack {
-                Spacer()
-                
-                //シャッターボタン
-                Button(action: {
-                    //写真を撮る処理
-                    camera.takePicture()
-                    
-                    //Haptic Feedback（端末を一瞬振動させる）
-                    let generator = UIImpactFeedbackGenerator(style: .medium)
-                    generator.impactOccurred()
-                    
-                    //画面を一瞬だけ白く光らせるアニメーション
-                    withAnimation(.linear(duration: 0.1)) {
-                        flashScreen = true
-                    }
-                    //0.1秒後に元の透明に戻す
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        withAnimation(.linear(duration: 0.1)) {
-                            flashScreen = false
+                            Spacer()
+                            
+                            Button(action: {
+                                //写真を撮る処理
+                                camera.takePicture()
+                                
+                                //Haptic Feedback（端末を一瞬振動させる）
+                                let generator = UIImpactFeedbackGenerator(style: .medium)
+                                generator.impactOccurred()
+                                
+                                //画面を一瞬だけ白く光らせるアニメーション
+                                withAnimation(.linear(duration: 0.1)) {
+                                    flashScreen = true
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    withAnimation(.linear(duration: 0.1)) {
+                                        flashScreen = false
+                                    }
+                                }
+                            }) {
+                                Circle()
+                                    .strokeBorder(Color.white, lineWidth: 3)
+                                    .background(Circle().fill(Color.white.opacity(0.8)))
+                                    .frame(width: 70, height: 70)
+                            }
+                            .padding(.bottom, 20) //シャッターボタンと選択ボタンの間の隙間
+                            
+                            //モード選択スイッチ（一番下に配置）
+                            Picker("mode", selection: $selectedMode) {
+                                ForEach(DietaryMode.allCases, id: \.self) { mode in
+                                    Text(mode.rawValue).tag(mode)
+                                }
+                            }
+                            .pickerStyle(SegmentedPickerStyle())
+                            .padding()
+                            .background(Color.black.opacity(0.6))
+                            .cornerRadius(10)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 40) //画面の一番下からの余白
                         }
-                    }
-                    
-                }) {
-                    Circle()
-                        .strokeBorder(Color.white, lineWidth: 3)
-                        .background(Circle().fill(Color.white.opacity(0.8)))
-                        .frame(width: 70, height: 70)
-                }
-                .padding(.bottom, 30)
-            }
         }
         .onAppear {
             camera.checkPermissions()

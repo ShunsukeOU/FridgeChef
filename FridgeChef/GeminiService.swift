@@ -22,7 +22,7 @@ struct Part: Codable, Sendable {
 }
 
 class GeminiService {
-    func analyzeImage(image: UIImage, completion: @escaping (String?) -> Void) {
+    func analyzeImage(image: UIImage, mode: DietaryMode, completion: @escaping (String?) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.7) else {
             completion("画像の処理に失敗しました。もう一度撮影してください。")
             return
@@ -35,7 +35,9 @@ class GeminiService {
             return
         }
         
-        let prompt = "この画像に写っている食材を分析し、一般的な調味料を組み合わせて作れる料理のレシピを一つ、次の要件に沿って教えてください。要件：１、まず食材を、「冷蔵庫内の食材：〇〇、〇〇、、」のように、箇条書きで示す。２、「提案する料理：〇〇（所要時間：〇〇分）」とシンプルに答える。３、「【材料：①、、】」「【手順】：①、、」のように、箇条書きかつわかりやすく、材料分量、と手順をまとめてください。焼いたり茹でたりレンジで調理が必要な場合は、その時間も記載してください。４、敬語で１〜３の内容を回答してください。その他の余分な文章は必要ありません。簡潔で構いませんので、なるべく早く回答をお願いいたします。"
+        let basePrompt = "この画像に写っている食材を分析し、一般的な調味料を組み合わせて作れる料理のレシピを一つ、次の要件に沿って教えてください。要件：１、まず食材を、「冷蔵庫内の食材：〇〇、〇〇、、」のように、箇条書きで示す。２、「提案する料理：〇〇（所要時間：〇〇分）」とシンプルに答える。３、「【材料：①、、】」「【手順】：①、、」のように、箇条書きかつわかりやすく、材料分量、と手順をまとめてください。焼いたり茹でたりレンジで調理が必要な場合は、その時間も記載してください。４、敬語で１〜３の内容を回答してください。その他の余分な文章は必要ありません。簡潔で構いませんので、なるべく早く回答をお願いいたします。"
+        
+        let prompt = basePrompt + "\n" + mode.additionalPrompt//各モードの専用プロンプトとくっつける
         
         let requestBody: [String: Any] = [
             "contents": [
@@ -66,25 +68,27 @@ class GeminiService {
             }
             
             guard let data = data else {
-                DispatchQueue.main.async { completion("データを受信できませんでした。") }
+                DispatchQueue.main.async { completion("データを受信できませんでした。もう一度撮影してください。") }
                 return
             }
             //返答が返ってこないのでAPIからの生のデータをXcodeのコンソールに出力する
             if let rawJSON = String(data: data, encoding: .utf8) {
-                print("🚨APIレスポンス: \(rawJSON)")
+                print("\(rawJSON)")
             }
-            //受け取ったJSONデータをSwiftの構造体に変換してテキストを抽出
-            do {
-                let decodedResponse = try JSONDecoder().decode(GeminiResponse.self, from: data)
-                let text = decodedResponse.candidates?.first?.content?.parts?.first?.text ?? "レシピを生成できませんでした。"
-                
-                //メインスレッド（UI更新用）で結果を返す
-                DispatchQueue.main.async {
-                    completion(text)
+            
+            //解析処理はメインスレッドの中で行うように囲んでおく
+            DispatchQueue.main.async {
+                do {
+                    let decodedResponse = try JSONDecoder().decode(GeminiResponse.self, from: data)
+                    let text = decodedResponse.candidates?.first?.content?.parts?.first?.text ?? "レシピを生成できませんでした。もう一度撮影してください。"
+                            
+                //結果を返す
+                completion(text)
+                } catch {
+                    completion("解析エラー：もう一度撮影してください。")
                 }
-            } catch {
-                DispatchQueue.main.async { completion("解析エラー：もう一度撮影してください。") }
             }
+            
         }.resume()
     }
 }
