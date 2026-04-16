@@ -6,3 +6,17 @@ Config.swift
 build/
 DerivedData/
 *.xcuserstate
+
+*.crx
+*.pem
+
+Thumbs.db
+
+
+.vscode/
+.idea/
+*.swp
+*~
+
+node_modules/
+.env
